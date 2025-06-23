@@ -19,6 +19,7 @@ const initializeSocket = (server) => {
     pingTimeout: 60000, // Disconnect inactive sockets after 60s
   })
   
+  //middleware
   io.use(socketAuthMiddleware);
   // When a new socket connection is established
   io.on("connection", (socket) => {
