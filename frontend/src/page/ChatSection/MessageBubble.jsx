@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { FaPlus, FaSmile, FaPlay, FaPause } from "react-icons/fa";
+import { FaPlus, FaSmile} from "react-icons/fa";
 import { format } from "date-fns";
 import EmojiPicker from "emoji-picker-react";
 import useOutsideClick from "../../hooks/useOutsideClick";

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { FaWhatsapp, FaLock, FaUser, FaCamera, FaCheck, FaPlus, FaArrowLeft, FaChevronDown } from 'react-icons/fa'
+import { FaWhatsapp, FaUser, FaCheck, FaPlus, FaArrowLeft, FaChevronDown } from 'react-icons/fa'
 import { useForm } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'

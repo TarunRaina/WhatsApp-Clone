@@ -1,6 +1,7 @@
 const { Server } = require("socket.io")
 const User = require("../../models/User")
 const Message = require("../../models/Message")
+const socketAuthMiddleware = require("../middlerwares/socketAuthMiddleware")
 
 // Map to store online users: userId -> socketId
 const onlineUsers = new Map()
@@ -12,12 +13,13 @@ const initializeSocket = (server) => {
   const io = new Server(server, {
     cors: {
       origin: process.env.FRONTEND_URL,
-      methods: ["GET", "POST"],
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     },
     pingTimeout: 60000, // Disconnect inactive sockets after 60s
   })
-
+  
+  io.use(socketAuthMiddleware);
   // When a new socket connection is established
   io.on("connection", (socket) => {
     console.log(`User connected: ${socket.id}`)
