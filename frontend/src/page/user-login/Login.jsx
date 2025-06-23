@@ -162,8 +162,9 @@ const {
       if(response.status === 'success'){
         console.log('OTP verified:', response)
         toast.success('OTP verified successfully')
+           const token = response?.data?.token;
+           localStorage.setItem('auth_token', token);
            const user = response.data?.user
-
       if (user?.username && user?.profilePicture) {
         setUser(user)
         toast.success('Welcome back on WhatsApp')
