@@ -11,7 +11,8 @@ exports.sendMessage = async (req, res) => {
     // Sort participants to maintain consistent conversation key
     const participants = [senderId, receiverId].sort();
 
-    // Check if conversation already exists
+    
+    // Check if conversation already exits
     let conversation = await Conversation.findOne({
       participants: participants,
     });

@@ -15,7 +15,8 @@ export const initializeSocket = () => {
   const BACKEND_URL = process.env.REACT_APP_API_URL;
   
   socket = io(BACKEND_URL, {
-    auth: { token },
+    // auth: { token },
+    withCredentials:true,
     transports: ["websocket", "polling"],
     reconnectionAttempts: 5,
     reconnectionDelay: 1000,

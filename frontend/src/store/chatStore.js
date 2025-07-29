@@ -14,7 +14,7 @@ export const useChatStore = create((set, get) => ({
   typingUsers: new Map(), // conversationId -> Set of userIds who are typing
 
   // ======== Socket Event Listeners Setup ========
-  initSocketListeners: () => {
+  initSocketListeners: () => { 
     const socket = getSocket();
     if (!socket) return;
 
