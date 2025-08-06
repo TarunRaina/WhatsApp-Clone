@@ -2,6 +2,7 @@ const { Server } = require("socket.io");
 const User = require("../../models/User");
 const Message = require("../../models/Message");
 const socketAuthMiddleware = require("../middlerwares/socketAuthMiddleware");
+const handleVideoCallEvents = require("../../utils/video-call-events");
 
 // Map to store online users: userId -> socketId
 const onlineUsers = new Map();
@@ -20,7 +21,7 @@ const initializeSocket = (server) => {
   });
 
   //middleware
-  io.use(socketAuthMiddleware);
+  // io.use(socketAuthMiddleware);
 
   // When a new socket connection is established
   io.on("connection", (socket) => {
@@ -33,6 +34,7 @@ const initializeSocket = (server) => {
     socket.on("user_connected", async (connectingUserId) => {
       try {
         userId = connectingUserId;
+        socket.userId = userId // CRITICAL: Store userId on socket for video call events
         onlineUsers.set(userId, socket.id);
         socket.join(userId); // Join personal room for direct emits
 
@@ -215,6 +217,9 @@ const initializeSocket = (server) => {
         }
       }
     );
+
+        // Handle video call events
+        handleVideoCallEvents(socket, io, onlineUsers)
 
     /**
      * Handle disconnection and mark user offline

@@ -234,6 +234,7 @@ export const useChatStore = create((set, get) => ({
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
+      console.log(data)
       const messageData = data.data || data;
 
       // Replace optimistic message with real one
