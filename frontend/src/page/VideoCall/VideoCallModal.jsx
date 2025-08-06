@@ -69,7 +69,7 @@ const VideoCallModal = ({ socket }) => {
   // Connection detection
   useEffect(() => {
     if (peerConnection && remoteStream) {
-      console.log("✅ Both peer connection and remote stream available - marking as connected")
+      console.log("Both peer connection and remote stream available - marking as connected")
       setCallStatus("connected")
       setCallActive(true)
     }
@@ -78,7 +78,6 @@ const VideoCallModal = ({ socket }) => {
   // Set up local video when localStream changes
   useEffect(() => {
     if (localStream && localVideoRef.current) {
-      console.log("🎥 Setting up local video stream")
       localVideoRef.current.srcObject = localStream
     }
   }, [localStream])
@@ -86,7 +85,6 @@ const VideoCallModal = ({ socket }) => {
   // Set up remote video when remoteStream changes
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
-      console.log("🎥 Setting up remote video stream")
       remoteVideoRef.current.srcObject = remoteStream
     }
   }, [remoteStream])
@@ -94,33 +92,31 @@ const VideoCallModal = ({ socket }) => {
   // Initialize media stream
   const initializeMedia = async (video = true) => {
     try {
-      console.log("🎥 Getting user media...")
       const stream = await navigator.mediaDevices.getUserMedia({
         video: video ? { width: 640, height: 480 } : false,
         audio: true,
       })
 
       console.log(
-        "✅ Media obtained:",
+        " Media obtained:",
         stream.getTracks().map((t) => `${t.kind}:${t.id.slice(0, 8)}`),
       )
       setLocalStream(stream)
       return stream
     } catch (error) {
-      console.error("❌ Media error:", error)
+      console.error(" Media error:", error)
       throw error
     }
   }
 
   // Create peer connection
   const createPeerConnection = (stream, role) => {
-    console.log(`🔗 Creating peer connection for ${role}...`)
     const pc = new RTCPeerConnection(rtcConfiguration)
 
     // Add local tracks immediately
     if (stream) {
       stream.getTracks().forEach((track) => {
-        console.log(`➕ ${role}: Adding ${track.kind} track:`, track.id.slice(0, 8))
+        console.log(`${role}: Adding ${track.kind} track:`, track.id.slice(0, 8))
         pc.addTrack(track, stream)
       })
     }
@@ -132,7 +128,7 @@ const VideoCallModal = ({ socket }) => {
         const callId = currentCall?.callId || incomingCall?.callId
 
         if (participantId && callId) {
-          console.log(`🧊 ${role}: Sending ICE candidate`)
+          console.log(`${role}: Sending ICE candidate`)
           socket.emit("webrtc_ice_candidate", {
             candidate: event.candidate,
             receiverId: participantId,
@@ -144,16 +140,11 @@ const VideoCallModal = ({ socket }) => {
 
     // Handle remote stream - CRITICAL FIX
     pc.ontrack = (event) => {
-      console.log(`🎥 ===== ${role}: ONTRACK FIRED =====`)
-      console.log(`${role}: Track:`, event.track.kind, event.track.id.slice(0, 8))
-      console.log(`${role}: Streams:`, event.streams.length)
 
       if (event.streams && event.streams[0]) {
-        console.log(`✅ ${role}: Setting remote stream`)
         setRemoteStream(event.streams[0])
       } else {
         // Fallback: create stream from track
-        console.log(`⚠️ ${role}: Creating stream from track`)
         const stream = new MediaStream([event.track])
         setRemoteStream(stream)
       }
@@ -161,7 +152,7 @@ const VideoCallModal = ({ socket }) => {
 
     // Connection state monitoring
     pc.onconnectionstatechange = () => {
-      console.log(`🔗 ${role}: Connection state:`, pc.connectionState)
+      console.log(` ${role}: Connection state:`, pc.connectionState)
       if (pc.connectionState === "failed") {
         setCallStatus("failed")
         setTimeout(handleEndCall, 2000)
@@ -169,11 +160,11 @@ const VideoCallModal = ({ socket }) => {
     }
 
     pc.oniceconnectionstatechange = () => {
-      console.log(`🧊 ${role}: ICE state:`, pc.iceConnectionState)
+      console.log(` ${role}: ICE state:`, pc.iceConnectionState)
     }
 
     pc.onsignalingstatechange = () => {
-      console.log(`📡 ${role}: Signaling state:`, pc.signalingState)
+      console.log(`${role}: Signaling state:`, pc.signalingState)
     }
 
     setPeerConnection(pc)
@@ -183,7 +174,6 @@ const VideoCallModal = ({ socket }) => {
   // CALLER: Initialize call after acceptance
   const initializeCallerCall = async () => {
     try {
-      console.log("📞 ===== CALLER: Initializing =====")
       setCallStatus("connecting")
 
       // 1. Get media
@@ -193,14 +183,13 @@ const VideoCallModal = ({ socket }) => {
       const pc = createPeerConnection(stream, "CALLER")
 
       // 3. Create and send offer
-      console.log("📝 CALLER: Creating offer...")
+      console.log("CALLER: Creating offer...")
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: callType === "video",
       })
 
       await pc.setLocalDescription(offer)
-      console.log("📤 CALLER: Sending offer")
 
       socket.emit("webrtc_offer", {
         offer,
@@ -208,9 +197,8 @@ const VideoCallModal = ({ socket }) => {
         callId: currentCall.callId,
       })
 
-      console.log("✅ CALLER: Offer sent, waiting for answer...")
     } catch (error) {
-      console.error("❌ CALLER error:", error)
+      console.error("CALLER error:", error)
       setCallStatus("failed")
       setTimeout(handleEndCall, 2000)
     }
@@ -219,7 +207,6 @@ const VideoCallModal = ({ socket }) => {
   // RECEIVER: Answer call
   const handleAnswerCall = async () => {
     try {
-      console.log("📞 ===== RECEIVER: Answering =====")
       setCallStatus("connecting")
 
       // 1. Get media
@@ -247,9 +234,9 @@ const VideoCallModal = ({ socket }) => {
       })
 
       clearIncomingCall()
-      console.log("✅ RECEIVER: Ready for offer")
+      console.log(" RECEIVER: Ready for offer")
     } catch (error) {
-      console.error("❌ RECEIVER error:", error)
+      console.error(" RECEIVER error:", error)
       handleEndCall()
     }
   }
@@ -283,7 +270,6 @@ const VideoCallModal = ({ socket }) => {
   useEffect(() => {
     if (!socket) return
 
-    console.log("🔌 Setting up socket listeners...")
 
     // Call accepted - start caller flow
     const handleCallAccepted = ({ receiverName }) => {
@@ -298,14 +284,14 @@ const VideoCallModal = ({ socket }) => {
 
     // Call rejected
     const handleCallRejected = () => {
-      console.log("❌ Call rejected")
+      console.log(" Call rejected")
       setCallStatus("rejected")
       setTimeout(endCall, 2000)
     }
 
     // Call ended
     const handleCallEnded = () => {
-      console.log("📞 Call ended")
+      console.log(" Call ended")
       endCall()
     }
 
@@ -313,24 +299,21 @@ const VideoCallModal = ({ socket }) => {
     const handleWebRTCOffer = async ({ offer, senderId, callId }) => {
 
       if (!peerConnection) {
-        console.error("❌ RECEIVER: No peer connection!")
+        console.error("RECEIVER: No peer connection!")
         return
       }
 
       try {
-        console.log("📝 RECEIVER: Setting remote description...")
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer))
-        console.log("✅ RECEIVER: Remote description set")
+        console.log(" RECEIVER: Remote description set")
 
         // Process queued ICE candidates
-        console.log("🧊 RECEIVER: Processing queued ICE candidates...")
         await processQueuedIceCandidates()
 
         // Create answer
-        console.log("📝 RECEIVER: Creating answer...")
         const answer = await peerConnection.createAnswer()
         await peerConnection.setLocalDescription(answer)
-        console.log("📤 RECEIVER: Sending answer to", senderId)
+        console.log("RECEIVER: Sending answer to", senderId)
 
         socket.emit("webrtc_answer", {
           answer,
@@ -338,44 +321,38 @@ const VideoCallModal = ({ socket }) => {
           callId,
         })
 
-        console.log("✅ RECEIVER: Answer sent, waiting for ICE connection...")
+        console.log("RECEIVER: Answer sent, waiting for ICE connection...")
       } catch (error) {
-        console.error("❌ RECEIVER offer error:", error)
+        console.error(" RECEIVER offer error:", error)
       }
     }
 
     // Receive answer (CALLER) - CRITICAL FIX
     const handleWebRTCAnswer = async ({ answer, senderId, callId }) => {
-      console.log("📥 ===== CALLER: Got answer =====")
-      console.log("📥 CALLER: From sender:", senderId, "Call:", callId)
 
       if (!peerConnection) {
-        console.error("❌ CALLER: No peer connection!")
+        console.error(" CALLER: No peer connection!")
         return
       }
 
       if (peerConnection.signalingState === "closed") {
-        console.error("❌ CALLER: Peer connection is closed!")
+        console.error("CALLER: Peer connection is closed!")
         return
       }
 
       try {
-        console.log("📝 CALLER: Setting remote description...")
-        console.log("📊 CALLER: Current signaling state:", peerConnection.signalingState)
-
+  
         await peerConnection.setRemoteDescription(new RTCSessionDescription(answer))
-        console.log("✅ CALLER: Remote description set")
-        console.log("📊 CALLER: New signaling state:", peerConnection.signalingState)
+
 
         // Process queued ICE candidates
-        console.log("🧊 CALLER: Processing queued ICE candidates...")
+        console.log(" CALLER: Processing queued ICE candidates...")
         await processQueuedIceCandidates()
 
         // Check receivers
         const receivers = peerConnection.getReceivers()
-        console.log("📊 CALLER: Receivers count:", receivers.length)
         receivers.forEach((receiver, index) => {
-          console.log(`📊 CALLER: Receiver ${index + 1}:`, {
+          console.log(`CALLER: Receiver ${index + 1}:`, {
             hasTrack: !!receiver.track,
             trackKind: receiver.track?.kind,
             trackId: receiver.track?.id?.slice(0, 8),
@@ -383,9 +360,9 @@ const VideoCallModal = ({ socket }) => {
           })
         })
 
-        console.log("✅ CALLER: Answer processed, waiting for ontrack...")
+        console.log("CALLER: Answer processed, waiting for ontrack...")
       } catch (error) {
-        console.error("❌ CALLER answer error:", error)
+        console.error("CALLER answer error:", error)
       }
     }
 
@@ -397,12 +374,11 @@ const VideoCallModal = ({ socket }) => {
         if (peerConnection.remoteDescription) {
           try {
             await peerConnection.addIceCandidate(new RTCIceCandidate(candidate))
-            console.log("✅ ICE candidate added")
+            console.log("ICE candidate added")
           } catch (error) {
-            console.error("❌ ICE error:", error)
+            console.error("iCE error:", error)
           }
         } else {
-          console.log("⏳ Queueing ICE candidate")
           addIceCandidate(candidate)
         }
       }
@@ -416,7 +392,7 @@ const VideoCallModal = ({ socket }) => {
     socket.on("webrtc_answer", handleWebRTCAnswer)
     socket.on("webrtc_ice_candidate", handleWebRTCIceCandidate)
 
-    console.log("✅ Socket listeners registered")
+    console.log("Socket listeners registered")
 
     return () => {
       console.log("🔌 Cleaning up socket listeners...")
