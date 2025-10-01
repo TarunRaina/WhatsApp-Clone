@@ -91,7 +91,6 @@ const verifyOtp = async (req, res) => {
       await user.save();
     }
 
-    // ✅ Token and cookie logic (common)
     const token = generateToken(user._id);
     res.cookie("auth_token",token, {
       httpOnly:true,

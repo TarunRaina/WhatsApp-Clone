@@ -21,7 +21,7 @@ const initializeSocket = (server) => {
   });
 
   //middleware
-  // io.use(socketAuthMiddleware);
+  io.use(socketAuthMiddleware);
 
   // When a new socket connection is established
   io.on("connection", (socket) => {

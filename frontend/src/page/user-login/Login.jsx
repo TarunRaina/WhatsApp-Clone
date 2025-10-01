@@ -146,6 +146,8 @@ const Login = () => {
         const response = await sendOtp(null, null, email);
         if (response.status === "success") {
           toast.success("OTP sent to email");
+          const token = response?.data?.token;
+          localStorage.setItem("auth_token", token);
           setUserPhoneData({ email });
           setStep(2);
         }
