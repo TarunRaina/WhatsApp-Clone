@@ -2,25 +2,27 @@ const jwt = require('jsonwebtoken');
 const response = require('../../utils/responseHandler');
 
 const authMiddleware = (req, res, next) => {
+  // Try to get from Authorization header
   const authHeader = req.headers['authorization'];
-  // const authToken = req.cookies?.auth_token;
-  // if (!authToken) {
-  //   return response(res, 401, 'Authorization token missing or malformed');
-  // }
+  let token = null;
 
-  //Expected format: "Bearer <token>"
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else if (req.cookies?.auth_token) {
+    // Or fallback to cookie
+    token = req.cookies.auth_token;
+  }
+
+  if (!token) {
     return response(res, 401, 'Authorization token missing or malformed');
   }
 
-  const token = authHeader.split(' ')[1]; // get the token part
-
   try {
-    const decoded = jwt.verify(authToken, process.env.JWT_SECRET);
-    req.user = decoded;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // attach decoded payload to request
     next();
   } catch (error) {
-    console.error(error);
+    console.error('Auth error:', error.message);
     return response(res, 401, 'Invalid or expired token');
   }
 };
